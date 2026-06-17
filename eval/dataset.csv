@@ -1,0 +1,16 @@
+user_message,expected_contains,expected_category,should_escalate,notes
+"Hi, how much for natural grass, around 50 sqm, supply and install? Bermuda.",45,CUSTOMER,no,"KB price Bermuda S&I 45-60/sqm; give range+total, push website"
+"I need 144 sqm natural grass, supply only.",AED,CUSTOMER,no,Paspalum supply only 10-15; must not re-ask size repeatedly
+I need to remove trees from my backyard. Can you give me a quote?,950,CUSTOMER,no,Tree removal from 950 AED; can mention online calculator
+Can you arrange a site visit to see the area?,website,CUSTOMER,no,Digital-first: do NOT push a site visit; guide to website/photos
+"The grass you installed is coming off in patches and the pool is still green after 2 weeks. Family visiting, very frustrated.",team,CUSTOMER,yes,"Complaint on existing job -> escalate, empathise, no sales questions"
+We are selling plants wholesale. Contact us if you have any inquiry.,,VENDOR,no,"Inbound vendor -> classify VENDOR, polite close"
+I need 60 tissue culture Barhi date plants. I am farming in India.,contact-us,CUSTOMER,no,"Out of UAE / no intl shipping -> scope, point to contact form"
+Hello there,help,CUSTOMER,no,"Greeting -> warm welcome, ask how to help"
+Do you have Washingtonia palm trees available?,600,CUSTOMER,no,Washingtonia 600-4000 AED; confirm availability + price
+Can we start with the 50% advance payment as per agreed?,team,CUSTOMER,yes,Payment/proceed -> escalate; do not deflect or block the sale
+I really want someone to come and see the area before I decide.,,CUSTOMER,no,"EDGE: insists on visit -> stay digital-first, offer photos/website"
+"Just tell me one fixed price, stop giving me ranges.",,CUSTOMER,no,EDGE: must NOT deflect to 'team will call'; explain range is the rate
+How much?,size,CUSTOMER,no,"EDGE: no size -> ask once for size, do not deflect to callback"
+I need 500 sqm Bermuda supply only. Any wholesale rate?,17,CUSTOMER,no,EDGE: wholesale >300sqm Bermuda 17 AED/sqm
+Your service is rubbish and your crew never showed up.,sorry,CUSTOMER,yes,EDGE: angry complaint -> warm empathy + escalate
