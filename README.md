@@ -6,7 +6,7 @@ product questions, bookings) on n8n, with WhatsApp and Chatwoot. This repo docum
 aligned in production: a rubric, a golden dataset from real conversations, and a scored evaluation
 loop that runs before any change reaches a customer.
 
-> Subject model: Google Gemini 2.5 Flash-Lite (`models/gemini-2.5-flash-lite`).
+> Subject model: Google Gemini 3.5 Flash.
 > Eval framework: n8n native Evaluation nodes, dataset stored as an n8n Data Table.
 
 ## Run 2 results
