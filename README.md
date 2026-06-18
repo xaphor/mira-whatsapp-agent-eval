@@ -59,7 +59,7 @@ is tracked as it moves.
 - Planned: gate releases on metric thresholds so a regression blocks a deploy.
 
 ## Stack
-n8n, WhatsApp Business API, Chatwoot, Google Gemini 2.5 Flash-Lite, n8n Evaluation nodes and Data Tables.
+n8n, WhatsApp Business API, Chatwoot, Google Gemini 3.5 Flash, n8n Evaluation nodes and Data Tables.
 
 ## Full write-up
 [`docs/eval-report.md`](docs/eval-report.md).
