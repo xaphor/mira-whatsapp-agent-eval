@@ -1,7 +1,7 @@
 # Evaluating a Production WhatsApp Sales Agent
 
 **System:** "Mira", a customer-facing sales agent for Easy Gardens Landscape Works (Dubai, UAE), running on n8n with WhatsApp and Chatwoot.
-**Model under test:** Google Gemini 2.5 Flash-Lite (`models/gemini-2.5-flash-lite`).
+**Model under test:** Google Gemini 3.5 Flash.
 **Eval framework:** n8n native Evaluation nodes, dataset stored as an n8n Data Table.
 **Eval design:** built with Claude as the engineering copilot.
 **Run:** #2, 15 cases.
