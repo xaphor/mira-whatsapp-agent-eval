@@ -65,4 +65,4 @@ n8n, WhatsApp Business API, Chatwoot, Google Gemini 3.5 Flash, n8n Evaluation no
 [`docs/eval-report.md`](docs/eval-report.md).
 
 ---
-Built and maintained by Zaffar. Evaluation design done with Claude as engineering copilot.
+Built and maintained by Zaffar.
