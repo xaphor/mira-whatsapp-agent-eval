@@ -11,7 +11,7 @@ loop that runs before any change reaches a customer.
 
 ## Run 2 results
 
-![Run 2 results](eval/run-2-results.png)
+![Run 2 results](eval/run-2-results.png.png)]
 
 | Metric | Score |
 | --- | --- |
