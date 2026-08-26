@@ -1,0 +1,3303 @@
+{
+  "name": "Mira: WhatsApp Intake and Triage Agent (sanitised export)",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b63371af-acd0-432e-a0fc-f40e9a5eef6c",
+              "leftValue": "={{ $binary.data?.fileName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3216,
+        560
+      ],
+      "id": "250fafb4-6e3a-427e-9a4a-98519e5f33ca",
+      "name": "Text Filter1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('Search Conversations').item.json.payload[0].id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $('who_is_this').item.json.user_query }}"
+            },
+            {
+              "name": "message_type",
+              "value": "incoming"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3440,
+        80
+      ],
+      "id": "07cb6a39-ecbf-4c5c-a41c-7ef1fea495bf",
+      "name": "Add to Existing (TEXT)",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b63371af-acd0-432e-a0fc-f40e9a5eef6c",
+              "leftValue": "={{ $binary.data?.fileName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3216,
+        176
+      ],
+      "id": "58b93180-dd94-41c0-a660-74f2924429ee",
+      "name": "Text Filter"
+    },
+    {
+      "parameters": {
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('User Types').item.json.conversation_id || $('User Types').item.json.id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5584,
+        1040
+      ],
+      "id": "abc2527c-1855-4af4-b768-7545fa25574d",
+      "name": "Check Latest Msg",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        7376,
+        1264
+      ],
+      "id": "20088a70-c7d2-488e-b6d2-25502b50b1b8",
+      "name": "Analyze video",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "text": "Analyze this image. If it shows a garden or plants, describe their condition, identify any diseases or maintenance needs, and suggest a solution. If it is a document or drawing, summarize the contents. If it is pictures with trees to be removed, identify the type of trees (Palm, Damas, Ghaff) or any others, determine height.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        7376,
+        976
+      ],
+      "id": "44ddcd28-9265-47fa-a27d-464b8dd74ad9",
+      "name": "Image Processor",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        7376,
+        640
+      ],
+      "id": "cb427032-c9b4-4716-b485-2612498e29c8",
+      "name": "Audio Processor",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// HIGHLANDER v7 (runner-safe).\n// Only the NEWEST inbound message in a burst reaches the agent, so a rapid run of\n// texts gets ONE considered answer instead of three overlapping ones.\n//\n// HISTORY - read before changing this node:\n//  v5 compared message TEXT, so two identical messages (\"Hello\" twice) both matched\n//     the newest message and both replied.\n//  v6 compared the WhatsApp send timestamp against Chatwoot's created_at. Those are\n//     two DIFFERENT clocks: created_at is stamped when WE log the message, which is\n//     after the debounce Wait. So every message looked older than itself, every run\n//     returned [] and the bot went completely silent while still reporting success.\n//  v7 compares Chatwoot message IDs, which are the same scale on both sides.\n//\n// Referenced nodes are limited to Check Latest Msg + Capture Conv ID, both of which\n// always execute on this path, including the media path (reading a NON-executed node\n// blocks forever under the external task runner - that was the old hang).\n\nconst messages = ($('Check Latest Msg').first().json.payload) || [];\n\nlet myId = null;\ntry { myId = Number($('Capture Conv ID').first().json.id); } catch (e) {}\n\nconst incoming = messages.filter(m => m && m.message_type === 0 && m.id != null);\nconst ids = incoming.map(m => Number(m.id));\n\n// FAIL OPEN in every ambiguous case. A duplicate reply is recoverable, silence is not.\nif (!myId || !ids.length) return $input.all();\nif (!ids.includes(myId)) return $input.all();\n\n// Only the newest inbound message answers for the whole burst.\nif (myId === Math.max.apply(null, ids)) return $input.all();\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5808,
+        1040
+      ],
+      "id": "ef129cd8-418d-4bca-b1f9-aec4da377800",
+      "name": "Burst Firewall"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5360,
+        1040
+      ],
+      "id": "e64797f1-ed91-4c0b-b187-921e90f45b3b",
+      "name": "Wait1",
+      "webhookId": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9461160d-d099-42fe-8292-b5733b5875a4",
+              "leftValue": "={{ $json.user_type }}",
+              "rightValue": "employee",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        528,
+        368
+      ],
+      "id": "f5fdd052-a9fc-4476-ae7c-ec29694e2963",
+      "name": "Is Employee?"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2768,
+        560
+      ],
+      "id": "a852979a-7b76-48f2-9dd4-a52d3682b79a",
+      "name": "Merge Bridge "
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1200,
+        560
+      ],
+      "id": "6a4fd6ec-4c0a-454d-a6d4-f793f94d50fb",
+      "name": "Download Binary",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/{{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0][$('who_is_this').first().json.message_type].id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        976,
+        560
+      ],
+      "id": "5d3d610b-322b-4a0c-91b1-b5c23c07281e",
+      "name": "Get Media URL",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "41eb7077-2548-419b-8076-ff45a643789f",
+              "leftValue": "={{ $('who_is_this').item.json.message_type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "419ce7bb-241c-4cb3-a0ab-f8b5c0d2a2b2",
+              "leftValue": "={{ $('who_is_this').item.json.message_type }}",
+              "rightValue": "location",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        368
+      ],
+      "id": "d00246fb-961d-43cd-aaef-9dcae27556ee",
+      "name": "has media?"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool ONLY when the user explicitly asks to book a service, schedule a visit, requests a call back or requests a formal quote. Do not use for general questions.",
+        "workflowId": {
+          "__rl": true,
+          "value": "2Xye8cPzY52lojIt",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/2Xye8cPzY52lojIt",
+          "cachedResultName": "Tool:Create Ticket"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $fromAI('phone', 'Customer Phone', 'string') }}",
+            "summary": "={{ $fromAI('summary', 'Summary of customer request', 'string') }}",
+            "name": "={{ $fromAI('name', 'Customer Name', 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        9776,
+        1280
+      ],
+      "id": "2261fd93-eb56-46e4-945c-d46598d279b6",
+      "name": "create_ticket_tool"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "CUSTOMER",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9d78afb5-31fd-4a1b-a49a-559b0738f969"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "34596132-ef4c-48d9-86a9-c6ede7d61793",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "VENDOR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "cf3df0b1-f7ac-4e08-86fd-10a58379734c",
+                    "leftValue": "={{ $json.output.category }}",
+                    "rightValue": "JOB_SEEKER",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "03cb86d7-9da0-4e5a-8ad6-56ef4e0a36b2",
+                    "leftValue": "={{ $json.output.reason }}",
+                    "rightValue": "SPAM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        5136,
+        624
+      ],
+      "id": "6aa7027f-3407-41eb-b299-7f127fb1eacc",
+      "name": "Traffic Router"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "__REDACTED__",
+        "recipientPhoneNumber": "={{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0].from }}",
+        "textBody": "Dear, we are currently not hring and not processing any jobs through whatsapp. However, you may want to send us your cv at: contact@example.com",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        5360,
+        656
+      ],
+      "id": "ac8d937e-262f-4872-9c8c-8109c9f8e326",
+      "name": "Reply to Job Seeker",
+      "webhookId": "__REDACTED__",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "__REDACTED__",
+        "recipientPhoneNumber": "={{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0].from }}",
+        "textBody": "Dear, we are currently not processing any sales through whatsapp. Please send us an email at contact@example.com",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        5360,
+        272
+      ],
+      "id": "18f6d2e7-a93a-4778-a380-c31549fa6e76",
+      "name": "Reply to Vendor",
+      "webhookId": "__REDACTED__",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        4640,
+        880
+      ],
+      "id": "71a988ea-0e39-4fee-ab7e-7f676a5b413d",
+      "name": "Google Gemini Chat Model1",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000,
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=### TASK\nClassify the sender based on the message below.\n\n### INPUT DATA\nMessage: \"{{ $('who_is_this').item.json.user_query }}\"\nType: \"{{ $('who_is_this').item.json.message_type }}\"\n\n### RULES\n1. **CUSTOMER** (DEFAULT - when in doubt, choose this)\n   - ANY Location, Audio, Video, or Image message is ALWAYS a CUSTOMER.\n   - Text asking about price, grass, landscaping, gardening, site visit, maintenance, tree removal, artificial turf, or any greeting (Hi, Hello, Salam, etc.).\n   - Anyone ASKING for a service or product is a CUSTOMER.\n   - Anyone talking about THEIR OWN property (garden, lawn, terrace, balcony, villa, pool area) is a CUSTOMER.\n   - If the message quotes, forwards or pastes back OUR OWN earlier replies (text that sounds like Easy Gardens describing its own services, or lines beginning with \"Mira:\"), it is a CUSTOMER reminding us of the conversation. NEVER call that a VENDOR.\n   - Mentions of payment, receipts, invoices or money owed are CUSTOMER (a human will handle it), never VENDOR.\n2. **VENDOR**\n   - Someone explicitly OFFERING to SELL a product or service TO Easy Gardens (e.g. \"We supply LEDs\", \"We offer software solutions\").\n   - Must be clearly pitching or promoting their own company, catalog or B2B deal, in their own words, with no sign that they are an existing enquiry.\n3. **JOB_SEEKER**\n   - Explicitly asking about job openings, vacancies, or sending a CV/resume.\n4. **SPAM**\n   - Clearly irrelevant forwards, chain messages, or promotional broadcasts.\n   - Do NOT mark garden photos or location pins as spam.\n\n### TIE-BREAKER\nIf a message could be CUSTOMER or any other category, ALWAYS choose CUSTOMER.\n\n### OUTPUT\nReturn ONLY a raw JSON object. No markdown, no code fences, no backticks, no extra text. Exactly this shape:\n{\"category\":\"CUSTOMER\",\"reason\":\"short reason\"}\nWhere category is one of: CUSTOMER, VENDOR, JOB_SEEKER, SPAM.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        4560,
+        656
+      ],
+      "id": "153f30cc-25d2-49c9-ab2d-a0732f0fa68e",
+      "name": "Gatekeeper"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        368
+      ],
+      "id": "88b26e3d-c387-4871-9026-5eb5c66275a2",
+      "name": "whatsapp-api",
+      "webhookId": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Identity gate. Everything WhatsApp sends us lands here first, and most of it is\n// not a customer. This node's only job is to decide who is talking and whether we\n// should be listening at all.\nconst employees = [\n  \"9715XXXXXX09\", \"9715XXXXXX05\", \"9715XXXXXX03\", \"9715XXXXXX08\", \n  \"9715XXXXXX10\", \"9715XXXXXX02\", \"9715XXXXXX07\", \"9715XXXXXX06\", \"9715XXXXXX01\"\n];\nconst admins = [\"\"];\n// Our own numbers. Meta echoes our outbound messages back through the same webhook,\n// so without this list the bot answers itself in a loop until the API rate-limits us.\n// This happened once. It cost a day.\nconst myBusinessNumber = \"9715XXXXXX04\"; \n\n// Pull the fields we need without assuming the payload shape. Meta changes it.\nconst webhookData = $('whatsapp-api').first().json;\nconst value = webhookData.body?.entry?.[0]?.changes?.[0]?.value;\n\n// Empty payloads arrive during delivery-receipt storms. Drop them silently.\nif (!value || !value.messages || value.messages.length === 0) return [];\n\nconst message = value.messages[0];\nconst sender = message.from;\nconst msgType = message.type;\n\n// Profile name comes free in the payload, so the agent never opens with \"what is your name\".\nconst contactName = value.contacts?.[0]?.profile?.name || \"\";\n\n// Reactions. A thumbs-up on our own reply is not a new enquiry.\nif (msgType === 'reaction') return [];\n\n// The loop stopper. If the sender is us, stop here.\n\nif (sender === myBusinessNumber) return [];\n\n// Status callbacks (sent, delivered, read) come through the same webhook as messages.\n\n// Anything reaching this line should be a real inbound message. Check anyway.\nif (value.statuses) return []; \n\n// Normalise the message body into one shape the rest of the flow can rely on.\nlet content = \"\";\nif (msgType === \"text\") {\n    content = message.text.body;\n} else if (msgType === \"image\") {\n    content = `📷 [Image Sent] ID: ${message.image.id}`;\n    if (message.image.caption) content += `\\nCaption: ${message.image.caption}`;\n} else if (msgType === \"audio\") {\n    content = `🎤 [Voice Note Sent] ID: ${message.audio.id}`;\n} else if (msgType === \"document\") {\n    content = `📄 [Document Sent] ${message.document.filename || \"File\"}`;\n} else {\n    content = `[${msgType} message]`;\n}\n\n// Cheap first-pass classification. Staff numbers are known, so they skip the LLM\n// entirely and go down the internal-ops branch instead of the customer branch.\nlet userType = \"customer\";\nif (admins.includes(sender) && content.startsWith(\"/\")) {\n  userType = \"command\";\n} else if (employees.includes(sender)) {\n  userType = \"employee\";\n}\n\nreturn {\n  json: {\n    user_type: userType,\n    phone: sender,\n    contact_name: contactName,\n    user_query: content,\n    message_type: msgType,\n    raw_message: message\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        368
+      ],
+      "id": "d01deaf7-9f22-42c2-81fe-b8f701e0f4ea",
+      "name": "who_is_this"
+    },
+    {
+      "parameters": {
+        "url": "https://chat.example-client.com/api/v1/accounts/1/contacts/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=+{{ $('who_is_this').item.json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1424,
+        304
+      ],
+      "id": "41f3a9a7-2ea4-4374-bf46-199a200e76d5",
+      "name": "Chatwoot Find Contact",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4834e9bc-df3a-4b43-a07d-a7178c53b471",
+              "leftValue": "={{ $json.payload[0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        304
+      ],
+      "id": "6e9edcb0-69fd-4c1c-af56-2aeaaa59bd05",
+      "name": "Is New Contact"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.example-client.com/api/v1/accounts/1/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"inbox_id\": 1,\n  \"phone_number\": \"+{{ $('who_is_this').item.json.phone }}\",\n  \"name\": \"{{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.contacts[0].profile.name || 'Customer ' + $('who_is_this').item.json.phone }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1872,
+        224
+      ],
+      "id": "d3875b39-56d8-4d4f-9126-d2686a64fa1c",
+      "name": "Chatwoot Create Contact",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json;\nlet source_id = null;\nlet contact_id = null;\n\n// Contact already in Chatwoot. Reuse the id rather than creating a duplicate,\n// otherwise conversation history fragments and the agent loses the thread.\nif (input.payload && Array.isArray(input.payload) && input.payload.length > 0) {\n    const contact = input.payload[0];\n    contact_id = contact.id;\n    if (contact.contact_inboxes && contact.contact_inboxes.length > 0) {\n        source_id = contact.contact_inboxes[0].source_id;\n    }\n}\n\n// First time we have seen this number. Take the id the create call just returned.\nelse if (input.payload && input.payload.contact) {\n    const contact = input.payload.contact;\n    contact_id = contact.id;\n    if (contact.source_id) {\n        source_id = contact.source_id;\n    } else if (contact.contact_inboxes && contact.contact_inboxes.length > 0) {\n         source_id = contact.contact_inboxes[0].source_id;\n    }\n}\n\nif (!source_id && input.source_id) source_id = input.source_id;\nif (!contact_id && input.id) contact_id = input.id;\n\nreturn { json: { source_id: source_id, contact_id: contact_id } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        416
+      ],
+      "id": "21af4eef-d016-45a9-9d9e-c159fe8f7b49",
+      "name": "Merge Contact"
+    },
+    {
+      "parameters": {
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/contacts/{{ $('Merge Contact').item.json.contact_id }}/conversations?status=open",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2320,
+        304
+      ],
+      "id": "92ff6714-2465-456d-8820-4a588c60225b",
+      "name": "Search Conversations",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.payload ? $json.payload.length : 0 }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2544,
+        304
+      ],
+      "id": "ab47cab9-9b03-4bb1-be6a-86fc6a5cca86",
+      "name": "Conversation Exists?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('Search Conversations').first().json.payload[0].id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $('who_is_this').item.json.user_query }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "attachments[]",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "message_type",
+              "value": "incoming"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3440,
+        272
+      ],
+      "id": "4ae0be63-bc72-46ad-ba6d-3a699090c387",
+      "name": "Add to Existing",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.example-client.com/api/v1/accounts/1/conversations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"source_id\": \"{{ $('Merge Contact').item.json.source_id }}\",\n  \"inbox_id\": 1,\n  \"status\": \"open\",\n  \"message\": { \"content\": {{ JSON.stringify($('who_is_this').item.json.user_query) }} }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3440,
+        464
+      ],
+      "id": "0dd0477c-213e-41c1-be66-b43aa5da7ddf",
+      "name": "Create New Thread",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2ff462df-32bc-49af-a9ee-1d7f3afde8fc",
+                    "leftValue": "employee",
+                    "rightValue": "={{ $('who_is_this').item.json.user_type }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "12b484c6-ef63-4f85-be86-750b35f2396c",
+                    "leftValue": "command",
+                    "rightValue": "={{ $('who_is_this').item.json.user_type }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e0e01cd8-d1c3-4083-a6e7-215fa0f48f46",
+                    "leftValue": "customer",
+                    "rightValue": "={{ $('who_is_this').item.json.user_type }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        3664,
+        448
+      ],
+      "id": "7f1ee768-196b-444e-a14a-92f67697b342",
+      "name": "User Types"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "operation": "search",
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "phone|string",
+                    "value": "={{ $('whatsapp-api').item.json.body.entry[0].changes[0].value.messages[0].from }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "properties": [
+            "bot_paused",
+            "firstname",
+            "email",
+            "phone"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        6032,
+        1040
+      ],
+      "id": "f935bb15-19d1-43ad-9c01-b282f0b1a887",
+      "name": "Search contacts",
+      "alwaysOutputData": true,
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1a7a71ff",
+              "leftValue": "={{ $('Search contacts').item.json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6256,
+        1040
+      ],
+      "id": "560206d5-4a83-4560-90e1-f87638a198ab",
+      "name": "ID Exists?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1a7a71ff-c2e1-45cc-b57b-a5f4b1ade33d",
+              "leftValue": "={{ String($('Search contacts').first().json.properties?.bot_paused) === 'true' || String($('Chatwoot Find Contact').first().json.payload[0]?.custom_attributes?.bot_paused) === 'true' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6480,
+        944
+      ],
+      "id": "f2e1109a-c02d-453f-ad25-1f5be3180e96",
+      "name": "If (Bot Paused)"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $('whatsapp-api').item.json.body.entry[0].changes[0].value.messages[0].from }}@example-client.com",
+        "additionalFields": {
+          "firstName": "={{ $('whatsapp-api').item.json.body.entry[0].changes[0].value.contacts[0].profile.name.split(' ')[0] }}",
+          "lastName": "={{ $('whatsapp-api').item.json.body.entry[0].changes[0].value.contacts[0].profile.name.split(' ').slice(1).join(' ') }}",
+          "leadStatus": "NEW",
+          "phoneNumber": "={{ $('who_is_this').item.json.phone }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        6480,
+        1136
+      ],
+      "id": "93532228-1e75-49fa-bfd0-2dcb305f6e3d",
+      "name": "Create HS Contact",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg =  $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0];\nconst text = msg.text?.body || msg.image?.caption || \"\";\nconst isDone = text.toUpperCase().trim().startsWith(\"DONE\");\nlet jobCode = \"\";\nif (isDone) {\n  jobCode = text.substring(4).trim().toUpperCase(); \n}\nreturn { \n  json: { \n    text: text, \n    is_done_command: isDone, \n    job_code: jobCode,\n    sender: msg.from\n  } \n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3888,
+        368
+      ],
+      "id": "bda9d6ba-9fa6-4bf8-8367-ca7906061fb6",
+      "name": "parse_employee_msg"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7d61dfd0-0fb2-4330-b688-2f4456a3b70d",
+              "leftValue": "={{ $json.is_done_command }}",
+              "rightValue": "True",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4112,
+        368
+      ],
+      "id": "f3ae7191-edad-44ae-a41a-a435dce29143",
+      "name": "if_done_check"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "deal",
+        "operation": "search",
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "job_code",
+                    "value": "={{ $json.job_code }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        4336,
+        272
+      ],
+      "id": "67a5c7c5-37cf-48dc-a355-059343e2a02a",
+      "name": "Search for deals",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "resource": "deal",
+        "operation": "update",
+        "dealId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "updateFields": {
+          "customPropertiesUi": {
+            "customPropertiesValues": [
+              {
+                "property": "last_visit_date",
+                "value": "={{ new Date($today).getTime() }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        4624,
+        272
+      ],
+      "id": "fe5d8045-3d37-45fe-a829-5b4429887f7e",
+      "name": "Update a deal",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "__REDACTED__",
+        "recipientPhoneNumber": "9715XXXXXX01",
+        "textBody": "=📩 Message from Staff ({{ $json.sender }}):  \"{{ $json.text }}\"",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        4336,
+        464
+      ],
+      "id": "b21a3e7b-a164-4dc3-bf53-236fca1ef92f",
+      "name": "staff_notice_to_admin",
+      "webhookId": "__REDACTED__",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "__REDACTED__",
+        "recipientPhoneNumber": "={{ $('parse_employee_msg').item.json.sender }}",
+        "textBody": "=✅ Job {{ $('parse_employee_msg').item.json.job_code }} Logged. Good work.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        4912,
+        272
+      ],
+      "id": "535d19d6-124f-45b6-9a5b-700a7d7744b0",
+      "name": "send message to employee",
+      "webhookId": "__REDACTED__",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Choose Context').item.json.user_query }}",
+        "options": {
+          "systemMessage": "=### ROLE\nYou are Mira at Easy Gardens UAE, chatting with customers on WhatsApp. You help with grass, trees and palms, irrigation, hardscaping and maintenance. Sound like a real, friendly Dubai landscaping person texting back, not a company bot.\n\n### VOICE - this is what stops people feeling they are talking to a bot. Follow it strictly.\n- Write like WhatsApp: short, warm, casual. Usually 1 to 2 short sentences.\n- Use contractions (I'll, you're, we've) and plain words.\n- NEVER use em dashes or semicolons. Use commas, full stops, or a new line. Light punctuation.\n- NEVER use markdown or formatting: no **bold**, no asterisks, no bullet lists with - or *, no numbered lists, no headers. Plain sentences only. If you list parts, write them as short plain lines or in a sentence.\n- Not corporate. Avoid 'I completely understand', 'I apologise for any inconvenience', 'kindly', 'rest assured', 'as per', long formal lists. 'Got it', 'sure', 'no problem' is better.\n- Don't repeat the customer's words back, don't over-apologise. Ask one thing at a time.\n- Match their energy. A light emoji now and then is fine, keep it rare.\n- Never start with your name or 'Mira:'. Never say 'as an AI' or mention being automated.\n\n### KEEP IT SHORT, SPLIT WHEN NEEDED\nPrefer ONE short message. If your reply genuinely needs more than about 3 short sentences, split it into AT MOST TWO messages by putting a line containing only [SPLIT] between the two parts. Do not split on every line or every sentence, only into two meaningful chunks. A price plus one question can usually stay in one message. Never write the word SPLIT anywhere else in your reply.\n\n### KNOWLEDGE BASE (service info, policies, areas)\n\"\"\"\n{{ $('KB Extract').item.json.data }}\n\"\"\"\n\n### CONVERSATION SO FAR (real transcript, oldest first, 'You' means you, Mira)\n\"\"\"\n{{ ($('Check Latest Msg').first().json.payload || []).filter(m => m && !m.private && (m.message_type === 0 || m.message_type === 1) && m.content && String(m.content).trim() && !String(m.content).includes('ESCALATION')).slice(-30).map(m => (m.message_type === 0 ? 'Customer: ' : 'You: ') + String(m.content).replace(/^Mira:\\s*/i, '').replace(/\\[\\s*SPLIT\\s*\\]/gi, ' ').replace(/\\s+/g, ' ').trim()).join('\\n') }}\n\"\"\"\n\n### MEMORY AND CONTINUITY - read this before replying\n- The transcript above is the REAL history of this chat, however long ago it started. It is the truth. Trust it completely.\n- NEVER say you are starting a new chat, that you cannot see the history, that you have lost the conversation, or ask the customer to repeat what is already written above. Saying that is a serious failure.\n- If there is any earlier exchange above, this is NOT the first message. Do not greet again and do not re-introduce yourself. Just continue naturally from where the conversation stopped, even if hours or days have passed.\n- Never re-ask for anything already answered above: their name, location, community, area size, service, budget or preferences. Read it from the transcript.\n- If the customer pastes our own earlier messages back at you, they are reminding you because we dropped the thread. Do not treat it as a new enquiry and do not analyse it as if they wrote it. Briefly acknowledge once, then carry on with the next useful step.\n- If the customer sounds frustrated, confused or says things like 'check the conversation', assume we lost context. Apologise in one short line, then answer using the transcript. Never ask them to start over.\n\n### CONTEXT (already known)\n- Name: {{ $('Universal Normalizer').item.json.sender_name }}\n- Phone: {{ $('Universal Normalizer').item.json.sender_phone }}\n- Latest message + any photo/video analysis: {{ $('Choose Context').item.json.user_query }}\n- The Name above comes from their WhatsApp profile, you already know it. Use it naturally. NEVER ask for their name unless the Name value is exactly 'there', and even then ask at most once, only when you actually need it for a ticket or estimate.\n- Phone is known, never ask for it.\n\n### PRICING LOGIC\n- ALWAYS call the price_lookup tool BEFORE quoting any number or preparing an estimate. It returns the full active price catalog with current rates, units and Zoho item ids. Never guess a rate or rely on memory. The Knowledge Base is a fallback only if the tool fails.\n- If an item or service is NOT in the price_lookup catalog, do NOT quote or invent ANY figure for it, not even a rough range. Say pricing for that item needs the team to confirm, and file a create_ticket for a formal quote. Inventing a price is the worst mistake you can make.\n- Many rates are COMPONENTS, not the finished price. For installed natural grass, ADD the parts: site clearing + site preparation + grass supply + grass laying. Never quote the bare supply rate as installed.\n- PALMS are SUPPLY ONLY items in the catalog. If the customer wants a palm planted/installed, add the separate catalog item 'Palm Installation with Crane' (once per palm) on top of the supply price. Transportation is included in that item; the client handles crane permits and must confirm the site allows crane access. Never bundle installation into the palm supply rate.\n- Quote a total as a range. If asked how it breaks down, or in a formal quote, list the parts plainly.\n- Profit floor: every job must clear at least AED 800 profit per working day. For small or far jobs, add a 'Mobilization & Transport' amount (Dubai 0, outer Dubai 150, Sharjah/Ajman 250, Abu Dhabi/RAK/Fujairah 350) or give the area minimum. Never quote a job that loses money.\n- Give a confident range, not false-precise numbers. Never present a specific total as final in chat, even after creating a draft estimate. If they push for the exact figure, say the team reviews the draft and sends the formal quote with the final number.\n\n### ESTIMATES & LINE ITEMS\n- When a job is well-defined and you create an estimate, build SEPARATE line items, one per operation, using catalog items from price_lookup. Example for installed natural grass: 1) Site Clearing - Grass and Debris Removal, 2) Site Preparation for natural grass, 3) grass supply (Bermuda, Paspalum or Hybrid), 4) Grass Laying. Example for palms with installation: 1) the palm supply item per size, 2) Palm Installation with Crane. Use each item's catalog name, rate_aed, unit and description.\n- Never lump several operations into one invented line item and never invent an item name or rate that is not in the catalog. Skip items marked LEGACY or Inactive.\n- You MAY add a short line to an item's standard description to match what the customer told you (e.g. 'the large ficus by the pool, roots included'), but only when it adds clarity and NO extra scope or cost. Otherwise keep the standard description.\n\n### MEDIA - photos and videos the customer sends\n- Lines in the transcript like '[Image Sent]', '[video message]' or '[Voice Note Sent]' mean the customer ALREADY sent that media. Treat it as received.\n- NEVER ask for photos again if the transcript shows they already sent some, and NEVER say you cannot see them or ask them to resend. That is the single most annoying thing we can do.\n- When analysis text is included with the latest message, mention briefly and casually what you saw.\n- If a photo arrived but no analysis text came through, our vision service was momentarily down. Acknowledge the photo anyway ('got your photos, thanks'), ask ONE short question about what they want done, and carry on. Never mention a technical problem and never ask them to resend.\n- Consider all photos together, reconcile the same item seen from different angles, do not over-count.\n- We do not remove Ghaff trees (UAE-protected). If flagged, say so and offer trimming instead.\n\n### BE SERVICE-AWARE\n1. Service clear -> read the photos through that lens, give the range plus the total when size is known, ask at most ONE question that changes the price.\n2. Photos but no stated goal yet -> say what you saw and ask 'what would you like done, removal, new grass, maintenance, or something else?'\n\n### HOW WE SELL - DIGITAL FIRST (follow this ladder strictly)\nWe qualify and convert in chat. Site visits cost us money and most never convert, so YOU NEVER confirm a site visit yourself and you NEVER offer or suggest a site visit on your own. A visit is a REQUEST that our team reviews and approves later, not something you book, offer or promise.\n1. Understand the problem first. What's wrong, what do they want done?\n2. No photos yet? Ask for a couple of photos of the area. Photos replace most site visits. Ask ONCE, and only if the transcript shows none were sent.\n3. Get the location (community, emirate, villa/building) and the approximate size. Only use location details the customer stated in this chat, never guess or reuse a random area name.\n4. Service + size clear? Call price_lookup and give a ballpark range in chat.\n5. Still unclear? Give a rough ballpark if you can, then offer: 'want me to have a formal quote sent over first so you can look at our prices?' Offer the quote, never a visit.\n6. Point them to https://www.example-client.com to book/pay or the online calculators. Never say 'the team will call you' for a pricing question.\nIf THE CUSTOMER asks for or insists on a site visit:\n- Do NOT agree to a visit or confirm any time. Never say things like 'we'll see you Monday at 9'. Never invent or accept a slot as confirmed.\n- First complete qualification: problem, photos, address, size.\n- Then file it with create_ticket as a VISIT REQUEST including everything gathered, and tell them: 'our team will review your site-visit request and confirm with you.'\n- File that ticket ONCE per request. If the transcript shows you already filed it, just reassure them the team has it.\n\n### WHEN TO BRING IN A HUMAN (rare)\nUse escalate_to_human ONLY for a complaint about an existing job, a payment or 'let's proceed', a B2B tender, or when they clearly ask for a person. create_ticket: a callback they ask for, a formal written quote, or a site-visit REQUEST after qualification (state clearly in the summary that it is an unconfirmed visit request pending team approval, with preferred time, address and problem). book_visit: only if the team has already approved the visit in this conversation. It still never lets you promise a confirmed time to the customer.\n\n### SCOPE\nNot a service in the KB (like pool cleaning) or outside our UAE zones -> say so kindly and point to https://www.example-client.com/contact-us/ .\n\n### POLICY\nAdvance payment varies by job. We don't remove Ghaff (trimming only). UAE only, no international shipping."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        10000,
+        1040
+      ],
+      "id": "6d18818c-25a3-4322-8656-8393d8b5c756",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        9456,
+        1264
+      ],
+      "id": "097b5fd8-776e-4e13-ad2b-a64413441270",
+      "name": "Google Gemini Chat Model",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0].from }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        9616,
+        1280
+      ],
+      "id": "a8ed6013-e4b5-43ee-95ef-5c83c9f5db6b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/881767928352668/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0].from }}\",\n  \"text\": {\n    \"body\": {{ JSON.stringify($json.output) }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        10944,
+        1040
+      ],
+      "id": "13453288-d5ba-4cdf-adef-437d7fff7440",
+      "name": "Whatsapp Reply",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "path": "ea2f63f1-6a54-430f-b76f-1b44594b684f",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        1488
+      ],
+      "id": "3065f4a1-e7f1-45e8-9f2b-21539a7dd802",
+      "name": "Handshake",
+      "webhookId": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query['hub.challenge'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        80,
+        1488
+      ],
+      "id": "9602f79d-3654-472f-b2a5-62ec9caf1db6",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('Capture Conv ID').item.json.conversation_id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    \"content\": \"Mira: \" + String($('Split Reply').item.json.output).replace(/\\[\\s*SPLIT\\s*\\]/gi, ' ').trim(),\n    \"message_type\": \"outgoing\",\n    \"private\": false,\n    \"content_attributes\": {\n      \"generated_by\": \"n8n_ai\"\n    }\n  }\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        11168,
+        1040
+      ],
+      "id": "1067169b-3c49-4dba-80e9-ddc5d3284ea9",
+      "name": "Log AI Reply to Chatwoot",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('who_is_this').item.json.message_type }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a4ac0ba9-9566-44b4-8746-c926bb337eea"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d47de957-2303-4824-8348-3c673eb52b6f",
+                    "leftValue": "={{ $('who_is_this').item.json.message_type }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a38ca89c-1372-481d-99e9-6db923339827",
+                    "leftValue": "={{ $('who_is_this').item.json.message_type }}",
+                    "rightValue": "video",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9d33d6fa-daa1-4f88-bb64-4338f635cfad",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        7152,
+        1008
+      ],
+      "id": "13005812-cb8e-4011-8543-774f78118559",
+      "name": "Media Router"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfcea5cd-a1b6-4df9-817a-96d4e55604a9",
+              "name": "data",
+              "value": "={{ $('Download Binary').first().binary.data }}",
+              "type": "binary"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6928,
+        1120
+      ],
+      "id": "a824213a-ddfa-4151-ad15-278e78970c41",
+      "name": "Re-attach Media"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source_id",
+              "value": "={{ $('Merge Contact').item.json.source_id }}"
+            },
+            {
+              "name": "contact_id",
+              "value": "={{ $('Merge Contact').item.json.contact_id }}"
+            },
+            {
+              "name": "message[content]",
+              "value": "={{$('who_is_this').item.json.user_query }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "message[attachments][]",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3440,
+        656
+      ],
+      "id": "bb0a575b-4660-44ed-a49f-09638a40426b",
+      "name": "Create New Thread (MEDIA)",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 6
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        368
+      ],
+      "id": "d8afca9d-55d5-4d18-a703-b7cbb6640954",
+      "name": "Wait",
+      "webhookId": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7674a7f4-dfd0-40cb-b229-4411d4d2a887",
+              "name": "data",
+              "value": "={{ $('Download Binary').first().binary.data }}",
+              "type": "binary"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2992,
+        112
+      ],
+      "id": "7eef1c10-af30-436a-9fe9-ead607fc1848",
+      "name": "Re-Attach Media Top"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "673f941a-4bbe-41fc-95f6-6cc5fce6a571",
+              "leftValue": "={{ $('Search Conversations').first().json.payload.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2992,
+        560
+      ],
+      "id": "7f9fe16d-3ad7-49ec-9538-77915b91b97f",
+      "name": "Is Truly New?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "67b0eb3a-6d42-4ef1-8843-487f663cc386",
+              "leftValue": "={{ $('who_is_this').item.json.message_type }}",
+              "rightValue": "text",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2768,
+        176
+      ],
+      "id": "7f8c46df-f24f-41ce-97a3-ae552a6af059",
+      "name": "Is Media?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7ad12213-1572-41ff-afe5-2f9f45577158",
+              "leftValue": "={{ $('Download Binary').isExecuted }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6704,
+        1040
+      ],
+      "id": "8d77d503-2ada-43b2-9f02-f47dd7b183f0",
+      "name": "Did Media Download?"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "19ALbUgF1wFDDcxjUB6HYYHa-F9PonE-RPo0xfLIozFU",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        7824,
+        1040
+      ],
+      "id": "609b65a8-3508-4947-9bf0-31470eb81b8e",
+      "name": "Knowledge Base",
+      "credentials": "__REDACTED__"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "conv-id-capture-001",
+              "name": "conversation_id",
+              "value": "={{ $json.conversation_id || $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3888,
+        656
+      ],
+      "id": "34cad77b-2172-41e3-acc2-81c6b71fd831",
+      "name": "Capture Conv ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('Capture Conv ID').item.json.conversation_id }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"labels\": [\"vendor\"] }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5360,
+        80
+      ],
+      "id": "9dec7f24-34c8-4455-a68e-4b5b45fc9e91",
+      "name": "Label Vendor",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('Capture Conv ID').item.json.conversation_id }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"labels\": [\"job_seeker\"] }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5360,
+        464
+      ],
+      "id": "aa2c165c-1552-42e6-9626-aff000f0ee53",
+      "name": "Label Job Seeker",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $('Capture Conv ID').item.json.conversation_id }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"labels\": [\"spam\"] }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5360,
+        848
+      ],
+      "id": "a392035e-4628-420c-a40a-4f189cd06e91",
+      "name": "Label Spam",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://chat.example-client.com/api/v1/accounts/1/conversations/{{ $json.conversation_id }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4112,
+        656
+      ],
+      "id": "d7cd394f-d526-4e91-a6d6-c7e632243541",
+      "name": "Check Conv Labels",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// REPEAT OFFENDER GATE (narrowed deliberately)\n// Previously ANY vendor/job_seeker/spam label muted the conversation forever.\n// One misclassification therefore killed a real lead in silence: a customer who\n// pasted our own earlier replies back at us was read as a \"vendor\" pitch, the\n// label stuck, and every later message from her was dropped with the execution\n// still reporting success.\n// Only hard spam mutes now. Vendors and job seekers are re-classified cheaply on\n// each message and still get their canned reply from the Traffic Router, so they\n// never reach the expensive agent, but a wrong label can no longer bury a sale.\nconst labels = $input.first().json.payload || [];\nconst blockedLabels = ['spam'];\nconst isBlocked = labels.some(label => blockedLabels.includes(label));\n\nif (isBlocked) {\n    return []; // Silent stop - message is already logged in Chatwoot\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4336,
+        656
+      ],
+      "id": "c17118eb-70e8-43ce-a3de-41cfde0dd4da",
+      "name": "Is Repeat Offender?"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "82874fc7-3843-41cb-ba82-1d4379df5119",
+      "name": "KB Extract",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        8048,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Files a site-visit REQUEST for the team to review and approve. Use ONLY after qualification is complete (photos, address, problem, size) and the customer still wants a visit. This does NOT confirm an appointment. Never tell the customer a visit time is confirmed; say the team will review the request and confirm. Provide customer_name, customer_phone, slot (their preferred time, as a preference only), location and service.",
+        "workflowId": {
+          "__rl": true,
+          "value": "MPLVMaIXKnLbMh1c",
+          "mode": "list",
+          "cachedResultName": "Tool: Book Visit"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_name": "={{ $fromAI('customer_name','Customer full name','string') }}",
+            "customer_phone": "={{ $fromAI('customer_phone','Customer phone, international format','string') }}",
+            "slot": "={{ $fromAI('slot','Preferred visit date and time','string') }}",
+            "location": "={{ $fromAI('location','Site location / community','string') }}",
+            "service": "={{ $fromAI('service','Service needed','string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "customer_phone",
+              "displayName": "customer_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "slot",
+              "displayName": "slot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "service",
+              "displayName": "service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "04a576bd-6b16-47ce-a176-66794b0c94b6",
+      "name": "book_visit_tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        9984,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Checks which visit slots are already booked/busy. Call before proposing a visit time. No inputs required.",
+        "workflowId": {
+          "__rl": true,
+          "value": "3EKJ1z45orkTrx3W",
+          "mode": "list",
+          "cachedResultName": "Tool: Check Availability"
+        }
+      },
+      "id": "441d3e0d-d31c-4b18-b009-7746dc199c00",
+      "name": "check_availability_tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        10160,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Use for COMPLAINTS, problems with an existing/finished job, payment or 'let us proceed' requests, and B2B tenders. Pauses the bot and alerts the team. Provide name, phone, reason and urgency.",
+        "workflowId": {
+          "__rl": true,
+          "value": "quD4iacuaQyM5Oaj",
+          "mode": "list",
+          "cachedResultName": "DRAFT Tool: Escalate to Human"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $fromAI('name','Customer name','string') }}",
+            "phone": "={{ $fromAI('phone','Customer phone','string') }}",
+            "reason": "={{ $fromAI('reason','One-line reason for escalation','string') }}",
+            "urgency": "={{ $fromAI('urgency','high or normal','string') }}",
+            "conversation_id": "={{ $('Capture Conv ID').item.json.conversation_id }}",
+            "account_id": "=1",
+            "contact_id": "={{ $('Merge Contact').item.json.contact_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "account_id",
+              "displayName": "account_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "contact_id",
+              "displayName": "contact_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "a9ece8a7-8395-41e5-97e0-c3c65349b37f",
+      "name": "escalate_to_human_tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        10352,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "type": "n8n-nodes-base.evaluationTrigger",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        -144
+      ],
+      "id": "e7a7a591-a666-4a73-a0d7-97ff78aae7ab",
+      "name": "When fetching a dataset row"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "hi1",
+              "name": "conversation_id",
+              "value": "={{ $('Capture Conv ID').item.json.conversation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "hi2",
+              "name": "account_id",
+              "value": "1",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5f92edfd-7224-44c2-afb8-7dc6f1c22e73",
+      "name": "Helper Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        8272,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "NWImux9m6matCk6r"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "a2b39698-de47-4b8d-a27f-bf735da1e4db",
+      "name": "Call Media Helper",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        9168,
+        1040
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "let uq='';\ntry{ const h=$('Call Media Helper').first(); if(h && h.json && (h.json.user_query||'').trim()) uq=h.json.user_query; }catch(e){}\nif(!uq){ try{ uq=$('Universal Normalizer').first().json.user_query||''; }catch(e){} }\nreturn [{ json:{ user_query: uq } }];"
+      },
+      "id": "7ef779ae-86af-40c6-b0ec-e6e22487f06c",
+      "name": "Choose Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        9392,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Universal Normalizer').item.json.media_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ee6f31a1-1abe-42ca-8eb3-b5bf6f285c35",
+      "name": "Has Media?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8720,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "__REDACTED__",
+        "recipientPhoneNumber": "={{ $('Universal Normalizer').item.json.sender_phone }}",
+        "textBody": "Thanks for sending those over! Give me a moment to take a look 🙂",
+        "additionalFields": {}
+      },
+      "id": "d26c0997-43fa-4624-ac5f-e0cc645d3d9a",
+      "name": "Send Ack",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        8944,
+        1040
+      ],
+      "webhookId": "__REDACTED__",
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split the agent reply into at most two WhatsApp bubbles.\n// Also scrubs the marker itself so a malformed marker can never reach the\n// customer or the Chatwoot log (we saw a literal \"[SPLIT]\" delivered).\nlet out = (($json.output) || '') + '';\n\n// normalise spacing/case variants the model emits: [ SPLIT ], [split], etc.\nout = out.replace(/\\[\\s*SPLIT\\s*\\]/gi, '[SPLIT]');\n\nlet parts = out.split('[SPLIT]').map(s => s.trim()).filter(Boolean);\nif (parts.length === 0) parts = [out.trim()];\nif (parts.length > 2) parts = [parts[0], parts.slice(1).join('\\n\\n')];\n\n// final scrub: any surviving bracketed marker, or a bare SPLIT on its own line\nparts = parts\n  .map(p => p.replace(/\\[\\s*SPLIT\\s*\\]/gi, ' ')\n             .replace(/^[ \\t]*SPLIT[ \\t]*$/gim, '')\n             .replace(/\\n{3,}/g, '\\n\\n')\n             .replace(/[ \\t]{2,}/g, ' ')\n             .trim())\n  .filter(Boolean);\n\nif (parts.length === 0) parts = [out.trim()];\nreturn parts.map(p => ({ json: { output: p } }));"
+      },
+      "id": "0670de49-0667-45ff-93c7-3b9ab0510175",
+      "name": "Split Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        10720,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deterministic parse of the Gatekeeper LLM output (no fragile structured parser).\n// Handles fenced or raw JSON, single or double nesting. Defaults to CUSTOMER on any\n// failure so a genuine lead is never dropped.\nlet t = $json.text;\nif (t == null) t = $json.response != null ? $json.response : ($json.output != null ? $json.output : '');\n\nlet parsed = null;\nif (t && typeof t === 'object') {\n  parsed = t;\n} else {\n  let s = String(t || '').trim();\n  const m = s.match(/```(?:json)?\\s*([\\s\\S]*?)```/i);\n  if (m) s = m[1].trim();\n  if (!s.startsWith('{')) { const i = s.indexOf('{'); const j = s.lastIndexOf('}'); if (i !== -1 && j !== -1) s = s.slice(i, j + 1); }\n  try { parsed = JSON.parse(s); } catch (e) { parsed = null; }\n}\n\nconst core = parsed && parsed.output ? parsed.output : (parsed || {});\nconst allowed = ['CUSTOMER', 'VENDOR', 'JOB_SEEKER', 'SPAM'];\nlet category = (core.category || '').toString().toUpperCase().trim();\nif (!allowed.includes(category)) category = 'CUSTOMER';\n\nreturn [{ json: { output: { category: category, reason: (core.reason || '').toString() } } }];"
+      },
+      "id": "e244e2d4-ab15-492a-ad0d-4d7a8eb49a0d",
+      "name": "Parse Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4912,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/881767928352668/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"status\": \"read\",\n  \"message_id\": \"{{ $('whatsapp-api').first().json.body.entry[0].changes[0].value.messages[0].id }}\",\n  \"typing_indicator\": { \"type\": \"text\" }\n}",
+        "options": {}
+      },
+      "id": "e4470467-1d4f-43be-a2bf-9aea2565f3dd",
+      "name": "Set Typing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8496,
+        1040
+      ],
+      "credentials": "__REDACTED__",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "description": "Create a DRAFT price estimate in Zoho Books when a job is well-defined (service and size known). BEFORE building line items, ALWAYS use the price_lookup tool to fetch the CURRENT catalog rate for each service, and build line_items from those rates (never guess). It finds or creates the customer, adds emirate-based mobilization, enforces our minimum job value, and alerts the team to review and send it. IMPORTANT: this creates a background draft for the team ONLY. Do NOT tell the customer the quote is finalized or send them the figure as final; keep chat pricing as a range. Provide line_items_json as a JSON array of {name, rate, quantity, description} using catalog rates with a short clear description; working_days as your estimate of on-site working days for the job (used for our minimum); the customer's name, address/villa and emirate exactly as stated in chat; email only if the customer volunteered one.",
+        "workflowId": {
+          "__rl": true,
+          "value": "4WfhFfn0cRJCy7FL",
+          "mode": "list",
+          "cachedResultName": "DRAFT Tool: Zoho Create Estimate"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customer_name": "={{ $fromAI('customer_name','Customer full name from chat','string') }}",
+            "email": "={{ $fromAI('email','Customer email ONLY if they gave one, else empty','string') }}",
+            "address": "={{ $fromAI('address','Street/villa/building from chat','string') }}",
+            "city": "={{ $fromAI('city','City or area from chat','string') }}",
+            "emirate": "={{ $fromAI('emirate','Emirate: Dubai, Sharjah, Ajman, Abu Dhabi, Ras Al Khaimah, Fujairah or Umm Al Quwain','string') }}",
+            "line_items_json": "={{ $fromAI('line_items_json','JSON array string of line items, each {name, rate, quantity, description}','string') }}",
+            "notes": "={{ $fromAI('notes','Optional short note for the estimate','string') }}",
+            "phone": "={{ $('who_is_this').item.json.phone }}",
+            "working_days": "={{ $fromAI('working_days','Estimated number of on-site working days for this job, minimum 1','number') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "city",
+              "displayName": "city",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "emirate",
+              "displayName": "emirate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "line_items_json",
+              "displayName": "line_items_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "working_days",
+              "displayName": "working_days",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "07a2ef14-e574-4cda-a365-7df6745e071a",
+      "name": "create_estimate_tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        10560,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Fetch the CURRENT price catalog (all active items) from the live rates table. Returns item_name, category, service_type, description, rate_aed, unit and Zoho item_id for every active catalog item. ALWAYS call this BEFORE quoting any price or building estimate line items, then pick the matching component items (e.g. for installed natural grass: site clearing + site preparation + grass supply + grass laying). Never guess rates.",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "FBVqtkTB1abk5CSo"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "Active"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "id": "f5229345-cf87-478e-b2da-fcb0f681c60c",
+      "name": "price_lookup",
+      "type": "n8n-nodes-base.dataTableTool",
+      "typeVersion": 1.1,
+      "position": [
+        10720,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "un-user-query",
+              "name": "user_query",
+              "type": "string",
+              "value": "={{ $('who_is_this').first().json.message_type === 'audio' ? ((($json.content?.parts?.[0]?.text ?? $json.text ?? '') !== '') ? ('[USER VOICE MESSAGE]: \"' + ($json.content?.parts?.[0]?.text ?? $json.text) + '\"') : $('who_is_this').first().json.user_query) : ($('who_is_this').first().json.message_type === 'image' ? ((($json.content?.parts?.[0]?.text ?? $json.text ?? '') !== '') ? ($('who_is_this').first().json.user_query + '\\n[VISUAL ANALYSIS]: ' + ($json.content?.parts?.[0]?.text ?? $json.text)) : $('who_is_this').first().json.user_query) : ($('who_is_this').first().json.message_type === 'video' ? ((($json.content?.parts?.[0]?.text ?? $json.text ?? '') !== '') ? ($('who_is_this').first().json.user_query + '\\n[VIDEO ANALYSIS]: ' + ($json.content?.parts?.[0]?.text ?? $json.text)) : $('who_is_this').first().json.user_query) : $('who_is_this').first().json.user_query)) }}"
+            },
+            {
+              "id": "un-msg-type",
+              "name": "message_type",
+              "type": "string",
+              "value": "={{ $('who_is_this').first().json.message_type || 'text' }}"
+            },
+            {
+              "id": "un-sender-name",
+              "name": "sender_name",
+              "type": "string",
+              "value": "={{ $('who_is_this').first().json.contact_name || $('who_is_this').first().json.sender_name || 'there' }}"
+            },
+            {
+              "id": "un-sender-phone",
+              "name": "sender_phone",
+              "type": "string",
+              "value": "={{ $('who_is_this').first().json.phone }}"
+            },
+            {
+              "id": "un-media-id",
+              "name": "media_id",
+              "type": "string",
+              "value": "={{ $('who_is_this').first().json.message_type === 'image' ? ($('who_is_this').first().json.raw_message.image?.id ?? '') : ($('who_is_this').first().json.message_type === 'video' ? ($('who_is_this').first().json.raw_message.video?.id ?? '') : '') }}"
+            },
+            {
+              "id": "un-timestamp",
+              "name": "timestamp",
+              "type": "number",
+              "value": "={{ Date.now() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e29d2027-b4a8-4749-9922-4cdad6399ac4",
+      "name": "Universal Normalizer",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7600,
+        1040
+      ]
+    }
+  ],
+  "connections": {
+    "Text Filter1": {
+      "main": [
+        [
+          {
+            "node": "Create New Thread (MEDIA)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create New Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Filter": {
+      "main": [
+        [
+          {
+            "node": "Add to Existing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add to Existing (TEXT)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Latest Msg": {
+      "main": [
+        [
+          {
+            "node": "Burst Firewall",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Check Latest Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Employee?": {
+      "main": [
+        [
+          {
+            "node": "has media?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "has media?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Bridge ": {
+      "main": [
+        [
+          {
+            "node": "Is Truly New?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Binary": {
+      "main": [
+        [
+          {
+            "node": "Merge Bridge ",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Chatwoot Find Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Media URL": {
+      "main": [
+        [
+          {
+            "node": "Download Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "has media?": {
+      "main": [
+        [
+          {
+            "node": "Get Media URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chatwoot Find Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Traffic Router": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply to Vendor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Label Vendor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply to Job Seeker",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Label Job Seeker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Label Spam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gatekeeper",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "whatsapp-api": {
+      "main": [
+        [
+          {
+            "node": "who_is_this",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "who_is_this": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatwoot Find Contact": {
+      "main": [
+        [
+          {
+            "node": "Is New Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Contact": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatwoot Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Merge Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Contact": {
+      "main": [
+        [
+          {
+            "node": "Search Conversations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Conversations": {
+      "main": [
+        [
+          {
+            "node": "Conversation Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Exists?": {
+      "main": [
+        [
+          {
+            "node": "Is Media?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge Bridge ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Existing (TEXT)": {
+      "main": [
+        [
+          {
+            "node": "User Types",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Existing": {
+      "main": [
+        [
+          {
+            "node": "User Types",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Thread": {
+      "main": [
+        [
+          {
+            "node": "User Types",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Types": {
+      "main": [
+        [
+          {
+            "node": "parse_employee_msg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "Capture Conv ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Burst Firewall": {
+      "main": [
+        [
+          {
+            "node": "Search contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search contacts": {
+      "main": [
+        [
+          {
+            "node": "ID Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ID Exists?": {
+      "main": [
+        [
+          {
+            "node": "If (Bot Paused)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create HS Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HS Contact": {
+      "main": [
+        [
+          {
+            "node": "Did Media Download?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_employee_msg": {
+      "main": [
+        [
+          {
+            "node": "if_done_check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if_done_check": {
+      "main": [
+        [
+          {
+            "node": "Search for deals",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "staff_notice_to_admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search for deals": {
+      "main": [
+        [
+          {
+            "node": "Update a deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a deal": {
+      "main": [
+        [
+          {
+            "node": "send message to employee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_ticket_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handshake": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whatsapp Reply": {
+      "main": [
+        [
+          {
+            "node": "Log AI Reply to Chatwoot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Media Router": {
+      "main": [
+        [
+          {
+            "node": "Audio Processor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Image Processor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Analyze video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Universal Normalizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If (Bot Paused)": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Did Media Download?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-attach Media": {
+      "main": [
+        [
+          {
+            "node": "Media Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Thread (MEDIA)": {
+      "main": [
+        [
+          {
+            "node": "User Types",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Is Employee?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-Attach Media Top": {
+      "main": [
+        [
+          {
+            "node": "Text Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Truly New?": {
+      "main": [
+        [
+          {
+            "node": "Text Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Media?": {
+      "main": [
+        [
+          {
+            "node": "Re-Attach Media Top",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Did Media Download?": {
+      "main": [
+        [
+          {
+            "node": "Re-attach Media",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Media Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture Conv ID": {
+      "main": [
+        [
+          {
+            "node": "Check Conv Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Conv Labels": {
+      "main": [
+        [
+          {
+            "node": "Is Repeat Offender?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Repeat Offender?": {
+      "main": [
+        [
+          {
+            "node": "Gatekeeper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Knowledge Base": {
+      "main": [
+        [
+          {
+            "node": "KB Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "book_visit_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check_availability_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "escalate_to_human_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KB Extract": {
+      "main": [
+        [
+          {
+            "node": "Helper Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Media Helper": {
+      "main": [
+        [
+          {
+            "node": "Choose Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Choose Context": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Media?": {
+      "main": [
+        [
+          {
+            "node": "Send Ack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call Media Helper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Ack": {
+      "main": [
+        [
+          {
+            "node": "Call Media Helper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Split Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Reply": {
+      "main": [
+        [
+          {
+            "node": "Whatsapp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gatekeeper": {
+      "main": [
+        [
+          {
+            "node": "Parse Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Gate": {
+      "main": [
+        [
+          {
+            "node": "Traffic Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Helper Input": {
+      "main": [
+        [
+          {
+            "node": "Set Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Typing": {
+      "main": [
+        [
+          {
+            "node": "Has Media?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_estimate_tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "price_lookup": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Processor": {
+      "main": [
+        [
+          {
+            "node": "Universal Normalizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze video": {
+      "main": [
+        [
+          {
+            "node": "Universal Normalizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Processor": {
+      "main": [
+        [
+          {
+            "node": "Universal Normalizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Universal Normalizer": {
+      "main": [
+        [
+          {
+            "node": "Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timeSavedPerExecution": 20,
+    "errorWorkflow": "ZyGQnzEyIjt7AZZV",
+    "executionTimeout": 180
+  },
+  "versionId": "__REDACTED__",
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "__REDACTED_HASH__"
+  },
+  "nodeGroups": [],
+  "id": "__REDACTED__",
+  "tags": [
+    {
+      "updatedAt": "2026-02-19T16:47:55.162Z",
+      "createdAt": "2026-02-19T16:47:55.162Z",
+      "id": "WjqtduA3vsz7UgiR",
+      "name": "Firewall Fix"
+    }
+  ]
+}
