@@ -1,6 +1,6 @@
 # Aligning a Production WhatsApp Sales Agent
 
-**Walkthrough video:** (https://www.loom.com/share/7fcd9a52b1284b7b9a54eef4bcc526a7)
+**Walkthrough video:** https://www.loom.com/share/7fcd9a52b1284b7b9a54eef4bcc526a7
 An evaluation harness for "Mira", a customer-facing WhatsApp sales agent I built and run for a
 landscaping company in Dubai, UAE. The agent handles real customer chats end to end (pricing,
 product questions, bookings) on n8n, with WhatsApp and Chatwoot. This repo documents how I keep it
